@@ -86,7 +86,18 @@ bool check_date(string number) {
 
 	return false;
 }
+//Проверка на пустую строку
+bool check_string(string adress) {
+	int count_probels = 0;
+	for (int i = 0; adress[i] != '\0'; i++) {
+		if ((char)(adress[i]) == 32){
+			count_probels++;
+		}
+	}
+	if (count_probels == adress.size()) return false;
 
+	return true;
+}
 //Object of apartament
 struct DataApartaments {
 private:
@@ -142,6 +153,7 @@ public:
 	void add_entrie(int counts_of_rooms, int storey, int area, int price, string adress, string date) {
 		arrDataAp.push_back(DataApartaments(counts_of_rooms, storey, area, price, adress, date));
 	}
+	// deleting an entry
 	void delete_entrie(int id) {
 		bool this_id_does_not_exist = true;
 		for (auto it = arrDataAp.begin(); it != arrDataAp.end(); ++it) {
@@ -152,9 +164,10 @@ public:
 				break;
 			}
 		}
-		if (this_id_does_not_exist) cout << "\nЭлемента с таким ID не существует\n";
-		else cout << "\nEntrie successfully deleted\n";
+		if (this_id_does_not_exist) cout << "\nЭлемента с таким ID не существует\n\n=============================\n";
+		else cout << "\nEntrie successfully deleted\n\n=============================\n";
 	}
+	// show all entries
 	void print_data() {
 		int null_elements = 0;
 		for (auto it = arrDataAp.begin(); it != arrDataAp.end(); ++it) {
@@ -165,21 +178,26 @@ public:
 			cout << "Площадь: " << it->getArea() << "\n";
 			cout << "Дата: " << it->getDate() << "\n";
 			cout << "ID: " << it->getID() << "\n\n";
+			cout << "=============================\n";
 			null_elements++;
 		}
-		if (!null_elements) { cout << "\nСписок пуст\n"; }
+		if (!null_elements) { cout << "\nСписок пуст\n\n=============================\n"; }
 	}
+	// find entry from id 
 	void find_by_ID(int id) {
+		bool this_element_does_not_exist = true;
 		for (auto it = arrDataAp.begin(); it != arrDataAp.end(); ++it) {
 			if (id == it->getID()) {
+				false;
 				cout << "Адрес: " << it->getAdress() << "\n";
 				cout << "Цена: " << it->getPrice() << "\n";
 				cout << "Кол-во комнат: " << it->getCountRooms() << "\n";
 				cout << "Этаж: " << it->getStorey() << "\n";
 				cout << "Площадь: " << it->getArea() << "\n";
-				cout << "ID: " << it->getID() << "\n\n";
+				cout << "ID: " << it->getID() << "\n";
 			}
 		}
+		if (this_element_does_not_exist) cout << "Такого элемента не существует\n\n=============================\n";
 	}
 
 	vector<DataApartaments> getArray() {
@@ -193,26 +211,17 @@ struct WriteDataFromFile {
 
 	void writeData(vector<DataApartaments> arr, string path) {
 		fstream file(path);
+		ifstream ifile(path);
+
+		int ID;
 
 		file.open(path + ".txt", fstream::in | fstream::out | fstream::app);
-
-		int id = 0;
+		ifile.open(path + ".txt");
 
 		if (file.is_open()) {
-
-
+			ifile >> ID;
 			for (auto it = arr.begin(); it != arr.end(); ++it) {
-				if (id == 0) {
-					file <<
-						it->getID() << " " <<
-						it->getCountRooms() << " " <<
-						it->getStorey() << " " <<
-						it->getArea() << " " <<
-						it->getPrice() << " " <<
-						it->getAdress() << " " <<
-						it->getDate();
-				}
-				else {
+				if (ID > 0) {
 					file << "\n" <<
 						it->getID() << " " <<
 						it->getCountRooms() << " " <<
@@ -222,10 +231,32 @@ struct WriteDataFromFile {
 						it->getAdress() << " " <<
 						it->getDate();
 				}
-				id++;
+				else {
+					if (it->getID() == 1) {
+						file <<
+							it->getID() << " " <<
+							it->getCountRooms() << " " <<
+							it->getStorey() << " " <<
+							it->getArea() << " " <<
+							it->getPrice() << " " <<
+							it->getAdress() << " " <<
+							it->getDate();
+					}
+					else {
+							file << "\n" <<
+								it->getID() << " " <<
+								it->getCountRooms() << " " <<
+								it->getStorey() << " " <<
+								it->getArea() << " " <<
+								it->getPrice() << " " <<
+								it->getAdress() << " " <<
+								it->getDate();
+					}
+				}
 			}
 			file.close();
 			cout << "\nЗапись произошла успешно\n";
+			cout << "\n=============================\n";
 		}
 		else {
 			cout << "Error open file.\n";
@@ -250,7 +281,7 @@ struct WriteDataFromFile {
 					break;
 				}
 			}
-			cout << "Запись произошла успешно";
+			cout << "\nЗапись произошла успешно\n\n=============================\n";
 			file.close();
 		}
 		else {
@@ -278,14 +309,15 @@ struct ReadDataFromFile {
 				file >> ID >> counts_of_rooms >> storey >> area >> price >> adress >> date;
 				if (ID < 0) {
 					cout << "\nError reading file\nmaybe file is empty\n";
-					break;
+					cout << "\n=============================\n";
+					return arr;
 				}
 				else arr.add_entrie(counts_of_rooms, storey, area, price, adress, date);
+				cout << "\nReading successfully\n\n=============================\n";
 			}
-
 		}
 		else {
-			cout << "Error open file.\n";
+			cout << "Error open file.\n\n=============================\n";
 		}
 		return arr;
 	}
@@ -294,16 +326,16 @@ struct ReadDataFromFile {
 int lifeCycle(ArrayDataApartaments<DataApartaments>& arrayDataApartaments, WriteDataFromFile writedatafromfile, ReadDataFromFile readdatafromfile) {
 	cout << "=============================\n";
 	cout << "list of available commands";
-	cout << "\n1. Add entrie";
-	cout << "\n2. Delete entrie";
-	cout << "\n3. Print data";
-	cout << "\n4. Find by ID";
-	cout << "\n5. Write data from ID";
-	cout << "\n6. Write data";
-	cout << "\n7. Read data";
-	cout << "\n8. Clear screen";
-	cout << "\n9. Show menu";
-	cout << "\n10. Exit\n";
+	cout << "\n1. Add entrie (add)";
+	cout << "\n2. Delete entrie (delete)";
+	cout << "\n3. Print data (print)";
+	cout << "\n4. Find by ID (findbyid)";
+	cout << "\n5. Write data from ID (writefromid)";
+	cout << "\n6. Write data (write)";
+	cout << "\n7. Read data (read)";
+	cout << "\n8. Clear screen (clear)";
+	cout << "\n9. Show menu (show)";
+	cout << "\n10. Exit (exit)\n";
 	cout << "=============================\n";
 
 
@@ -315,6 +347,7 @@ int lifeCycle(ArrayDataApartaments<DataApartaments>& arrayDataApartaments, Write
 	{
 		cout << "\nEnter choice: ";
 		cin >> choise;
+		cout << "\n=============================\n";
 		if (choise == "Add" || choise == "add") {
 			no_choise_made = true;
 			int counts_of_rooms;
@@ -332,8 +365,11 @@ int lifeCycle(ArrayDataApartaments<DataApartaments>& arrayDataApartaments, Write
 			cout << "price: ";
 			cin >> price;
 			cout << "adress: ";
-			cin.ignore();
 			getline(cin, adress);
+			while (!check_string(adress)) {
+				getline(cin, adress);
+				if (!check_string(adress)) cout << "Empty string entered\nadress: ";
+			}
 			cout << "date: ";
 			cin >> date;
 			while (!check_date(date)) {
@@ -342,7 +378,8 @@ int lifeCycle(ArrayDataApartaments<DataApartaments>& arrayDataApartaments, Write
 				cin >> date;
 			}
 			arrayDataApartaments.add_entrie(counts_of_rooms, storey, area, price, adress, date);
-			cout << "\n\nEntrie successfully added\n\n";
+			cout << "\n\nEntrie successfully added\n";
+			cout << "\n=============================\n";
 		}
 		else if (choise == "Delete" || choise == "delete") {
 			no_choise_made = true;
@@ -357,9 +394,9 @@ int lifeCycle(ArrayDataApartaments<DataApartaments>& arrayDataApartaments, Write
 		}
 		else if (choise == "FindByID" || choise == "findbyid") {
 			int id;
-			cout << "Enter id: ";
+			cout << "\nEnter id: ";
 			cin >> id;
-			cout << "\n\n";
+			cout << "\n";
 			arrayDataApartaments.find_by_ID(id);
 			no_choise_made = true;
 		}
@@ -367,7 +404,7 @@ int lifeCycle(ArrayDataApartaments<DataApartaments>& arrayDataApartaments, Write
 			string path;
 			int id;
 
-			cout << "Enter id: ";
+			cout << "\nEnter id: ";
 			cin >> id;
 
 			cout << "\nWrite filename: ";
